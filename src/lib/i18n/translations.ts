@@ -1,0 +1,326 @@
+export type Locale = "en" | "zh";
+
+export const translations = {
+  en: {
+    // Navigation
+    nav: {
+      imageToText: "Image To Text",
+      batchUpload: "Batch Upload",
+      imageTranslator: "Image Translator",
+      jpgToWord: "JPG To Word",
+      jpgToExcel: "JPG To Excel",
+      pdfToExcel: "PDF To Excel",
+      pricing: "Pricing",
+      login: "Login",
+    },
+    // Home page
+    home: {
+      title: "Image to Text Converter",
+      subtitle: "An online image to text converter to extract text from images.",
+      dropzone: {
+        title: "Drop, Upload or Paste Images",
+        dragActive: "Drop the image here",
+        formats: "Supported formats: JPG, PNG, GIF, JFIF (JPEG), HEIC, PDF",
+        browse: "Browse",
+      },
+      mode: {
+        simple: "Simple OCR",
+        formatted: "Formatted Text",
+      },
+      language: "Language:",
+      privacy: "*Your privacy is protected! No data is transmitted or stored.",
+      features: {
+        formats: {
+          title: "Multiple Formats",
+          description: "Supports JPG, PNG, GIF, JFIF, HEIC, PDF and more image formats.",
+        },
+        languages: {
+          title: "Multi-Language OCR",
+          description: "Extract text in English, Chinese, Japanese, Korean and 15+ languages.",
+        },
+        privacy: {
+          title: "100% Privacy",
+          description: "All processing happens in your browser. No data is uploaded to servers.",
+        },
+      },
+      rating: "Rate this tool",
+    },
+    // OCR Result
+    result: {
+      title: "Extracted Text",
+      processing: "Processing...",
+      copy: "Copy",
+      download: "Download",
+      reset: "New Image",
+      copied: "Copied to clipboard!",
+      noText: "No text detected in the image.",
+    },
+    // Batch page
+    batch: {
+      title: "Batch Image to Text",
+      subtitle: "Upload multiple images and extract text from all of them at once.",
+      settings: "OCR Settings",
+      selectFiles: "Select Files",
+      processAll: "Process All Files",
+      downloadAll: "Download All",
+      clearAll: "Clear All",
+      pending: "Pending",
+      processing: "Processing...",
+      completed: "completed",
+      features: {
+        batch: {
+          title: "Batch Processing",
+          description: "Upload up to 10 images and process them all at once with a single click.",
+        },
+        progress: {
+          title: "Progress Tracking",
+          description: "See real-time progress for each file being processed.",
+        },
+        download: {
+          title: "Download All",
+          description: "Download all extracted text as a single combined file.",
+        },
+      },
+    },
+    // Login
+    login: {
+      welcome: "Welcome Back",
+      createAccount: "Create an Account",
+      signIn: "Sign in to your account",
+      signUp: "Sign up to access premium features",
+      email: "Email",
+      password: "Password",
+      signInBtn: "Sign In",
+      signUpBtn: "Create Account",
+      signingIn: "Signing in...",
+      creatingAccount: "Creating account...",
+      orContinueWith: "or continue with email",
+      alreadyHaveAccount: "Already have an account?",
+      dontHaveAccount: "Don't have an account?",
+      terms: "Terms of Service",
+      privacy: "Privacy Policy",
+      agreement: "By continuing, you agree to our",
+    },
+    // Dashboard
+    dashboard: {
+      title: "Dashboard",
+      subtitle: "Manage your account and usage",
+      signOut: "Sign Out",
+      profile: "Profile",
+      dailyUsage: "Daily Usage",
+      totalConversions: "Total Conversions",
+      conversions: "conversions",
+      allTime: "All time conversions",
+      resetsDaily: "Resets daily at midnight UTC",
+      quickActions: "Quick Actions",
+      accountSettings: "Account Settings",
+      upgradePlan: "Upgrade Plan",
+      comingSoon: "Coming Soon",
+      upgradeTitle: "Upgrade to Pro",
+      upgradeDescription: "Get 500 conversions/day, high-precision OCR, and priority support.",
+      upgradeNow: "Upgrade Now",
+    },
+    // Pricing
+    pricing: {
+      title: "Simple, Transparent Pricing",
+      subtitle: "Choose the plan that's right for you",
+      monthly: "Monthly",
+      yearly: "Yearly",
+      perMonth: "/month",
+      current: "Current Plan",
+      getStarted: "Get Started",
+      subscribe: "Subscribe",
+      contactUs: "Contact Us",
+      features: {
+        conversions: "conversions/day",
+        unlimited: "Unlimited conversions",
+        fileSize: "MB file size",
+        batch: "files batch",
+        history: "history",
+        api: "API access",
+        support: "support",
+      },
+    },
+    // Common
+    common: {
+      loading: "Loading...",
+      error: "Error",
+      success: "Success",
+      cancel: "Cancel",
+      save: "Save",
+      delete: "Delete",
+      close: "Close",
+      back: "Back",
+    },
+    // Footer
+    footer: {
+      product: "Product",
+      legal: "Legal",
+      termsOfService: "Terms of Service",
+      privacyPolicy: "Privacy Policy",
+      allRightsReserved: "All rights reserved.",
+    },
+  },
+  zh: {
+    // Navigation
+    nav: {
+      imageToText: "图片转文字",
+      batchUpload: "批量上传",
+      imageTranslator: "图片翻译",
+      jpgToWord: "JPG转Word",
+      jpgToExcel: "JPG转Excel",
+      pdfToExcel: "PDF转Excel",
+      pricing: "价格",
+      login: "登录",
+    },
+    // Home page
+    home: {
+      title: "图片转文字转换器",
+      subtitle: "在线图片文字识别工具，从图片中提取文字。",
+      dropzone: {
+        title: "拖放、上传或粘贴图片",
+        dragActive: "将图片放在这里",
+        formats: "支持格式：JPG、PNG、GIF、JFIF（JPEG）、HEIC、PDF",
+        browse: "浏览文件",
+      },
+      mode: {
+        simple: "简单OCR",
+        formatted: "格式化文本",
+      },
+      language: "语言：",
+      privacy: "*您的隐私受到保护！不会传输或存储任何数据。",
+      features: {
+        formats: {
+          title: "多种格式",
+          description: "支持JPG、PNG、GIF、JFIF、HEIC、PDF等多种图片格式。",
+        },
+        languages: {
+          title: "多语言OCR",
+          description: "支持英语、中文、日语、韩语等15+种语言的文字识别。",
+        },
+        privacy: {
+          title: "100%隐私保护",
+          description: "所有处理都在您的浏览器中完成，不会上传任何数据到服务器。",
+        },
+      },
+      rating: "给这个工具评分",
+    },
+    // OCR Result
+    result: {
+      title: "提取的文字",
+      processing: "处理中...",
+      copy: "复制",
+      download: "下载",
+      reset: "新图片",
+      copied: "已复制到剪贴板！",
+      noText: "未在图片中检测到文字。",
+    },
+    // Batch page
+    batch: {
+      title: "批量图片转文字",
+      subtitle: "上传多张图片，一次性提取所有图片中的文字。",
+      settings: "OCR设置",
+      selectFiles: "选择文件",
+      processAll: "处理所有文件",
+      downloadAll: "下载全部",
+      clearAll: "清除全部",
+      pending: "等待中",
+      processing: "处理中...",
+      completed: "已完成",
+      features: {
+        batch: {
+          title: "批量处理",
+          description: "一次上传最多10张图片，一键处理所有图片。",
+        },
+        progress: {
+          title: "进度跟踪",
+          description: "实时查看每个文件的处理进度。",
+        },
+        download: {
+          title: "下载全部",
+          description: "将所有提取的文字下载为一个合并的文件。",
+        },
+      },
+    },
+    // Login
+    login: {
+      welcome: "欢迎回来",
+      createAccount: "创建账户",
+      signIn: "登录您的账户",
+      signUp: "注册以访问高级功能",
+      email: "邮箱",
+      password: "密码",
+      signInBtn: "登录",
+      signUpBtn: "创建账户",
+      signingIn: "正在登录...",
+      creatingAccount: "正在创建账户...",
+      orContinueWith: "或使用邮箱继续",
+      alreadyHaveAccount: "已有账户？",
+      dontHaveAccount: "没有账户？",
+      terms: "服务条款",
+      privacy: "隐私政策",
+      agreement: "继续即表示您同意我们的",
+    },
+    // Dashboard
+    dashboard: {
+      title: "控制面板",
+      subtitle: "管理您的账户和使用情况",
+      signOut: "退出登录",
+      profile: "个人资料",
+      dailyUsage: "今日用量",
+      totalConversions: "总转换次数",
+      conversions: "次转换",
+      allTime: "历史总计",
+      resetsDaily: "每日UTC午夜重置",
+      quickActions: "快捷操作",
+      accountSettings: "账户设置",
+      upgradePlan: "升级套餐",
+      comingSoon: "即将推出",
+      upgradeTitle: "升级到专业版",
+      upgradeDescription: "获得每天500次转换、高精度OCR和优先支持。",
+      upgradeNow: "立即升级",
+    },
+    // Pricing
+    pricing: {
+      title: "简单透明的定价",
+      subtitle: "选择适合您的套餐",
+      monthly: "月付",
+      yearly: "年付",
+      perMonth: "/月",
+      current: "当前套餐",
+      getStarted: "开始使用",
+      subscribe: "订阅",
+      contactUs: "联系我们",
+      features: {
+        conversions: "次转换/天",
+        unlimited: "无限次转换",
+        fileSize: "MB文件大小",
+        batch: "个文件批量处理",
+        history: "历史记录",
+        api: "API访问",
+        support: "支持",
+      },
+    },
+    // Common
+    common: {
+      loading: "加载中...",
+      error: "错误",
+      success: "成功",
+      cancel: "取消",
+      save: "保存",
+      delete: "删除",
+      close: "关闭",
+      back: "返回",
+    },
+    // Footer
+    footer: {
+      product: "产品",
+      legal: "法律",
+      termsOfService: "服务条款",
+      privacyPolicy: "隐私政策",
+      allRightsReserved: "保留所有权利。",
+    },
+  },
+} as const;
+
+export type TranslationKey = keyof typeof translations.en;
