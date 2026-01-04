@@ -2,7 +2,8 @@ export const LEMONSQUEEZY_PLANS = {
   basic: {
     name: "Basic",
     price: 9.9,
-    variantId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_BASIC_VARIANT_ID || "1191936",
+    variantId: "1191936",
+    checkoutId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_BASIC_CHECKOUT_ID || "ce970bb0-9b1e-4d48-b224-89d937df388b",
     features: [
       "100 conversions per day",
       "High-precision OCR",
@@ -14,7 +15,8 @@ export const LEMONSQUEEZY_PLANS = {
   pro: {
     name: "Pro",
     price: 19.9,
-    variantId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRO_VARIANT_ID || "1191941",
+    variantId: "1191941",
+    checkoutId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_PRO_CHECKOUT_ID || "6458a732-c022-4a76-9f75-a0b942a717b8",
     features: [
       "500 conversions per day",
       "High-precision OCR",
@@ -27,7 +29,8 @@ export const LEMONSQUEEZY_PLANS = {
   enterprise: {
     name: "Enterprise",
     price: 49.9,
-    variantId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_ENTERPRISE_VARIANT_ID || "1191943",
+    variantId: "1191943",
+    checkoutId: process.env.NEXT_PUBLIC_LEMONSQUEEZY_ENTERPRISE_CHECKOUT_ID || "a441e1c0-d2d8-44f5-b6bd-52e2e20a3d06",
     features: [
       "Unlimited conversions",
       "High-precision OCR",
