@@ -13,8 +13,17 @@ import {
   AlertCircle,
   FileText,
   Download,
+  ChevronDown,
+  Files,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface FileItem {
   id: string;
@@ -102,10 +111,11 @@ export function BatchUploader({
 
     setIsProcessing(true);
 
-    for (let i = 0; i < files.length; i++) {
-      const fileItem = files[i];
-      if (fileItem.status === "completed") continue;
+    const pendingFiles = files.filter((f) => f.status !== "completed");
+    const CONCURRENCY = 3; // Process 3 files in parallel
 
+    // Process files in parallel with limited concurrency
+    const processFile = async (fileItem: FileItem) => {
       setFiles((prev) =>
         prev.map((f) =>
           f.id === fileItem.id ? { ...f, status: "processing" as const, progress: 0 } : f
@@ -141,26 +151,53 @@ export function BatchUploader({
           )
         );
       }
+    };
+
+    // Process in batches of CONCURRENCY
+    for (let i = 0; i < pendingFiles.length; i += CONCURRENCY) {
+      const batch = pendingFiles.slice(i, i + CONCURRENCY);
+      await Promise.all(batch.map(processFile));
     }
 
     setIsProcessing(false);
   };
 
-  const downloadAllResults = () => {
+  const downloadAllMerged = () => {
     const completedFiles = files.filter((f) => f.status === "completed" && f.result);
     if (completedFiles.length === 0) return;
 
     const combinedText = completedFiles
-      .map((f, i) => `--- ${f.file.name} ---\n\n${f.result}\n`)
-      .join("\n");
+      .map((f) => `=== ${f.file.name} ===\n\n${f.result}\n`)
+      .join("\n" + "=".repeat(50) + "\n\n");
 
     const blob = new Blob([combinedText], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "batch-ocr-results.txt";
+    a.download = "all-extracted-text.txt";
     a.click();
     URL.revokeObjectURL(url);
+    toast.success("All results downloaded as one file!");
+  };
+
+  const downloadAllSeparate = () => {
+    const completedFiles = files.filter((f) => f.status === "completed" && f.result);
+    if (completedFiles.length === 0) return;
+
+    completedFiles.forEach((f, index) => {
+      setTimeout(() => {
+        const blob = new Blob([f.result!], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = f.file.name.replace(/\.[^/.]+$/, "") + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, index * 200);
+    });
+    toast.success(`Downloading ${completedFiles.length} files...`);
   };
 
   const clearAll = () => {
@@ -231,14 +268,25 @@ export function BatchUploader({
             </span>
             <div className="flex gap-2">
               {hasResults && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={downloadAllResults}
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download All
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download All
+                      <ChevronDown className="h-4 w-4 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={downloadAllSeparate}>
+                      <Files className="h-4 w-4 mr-2" />
+                      Download Separately
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={downloadAllMerged}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Download Merged
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
               <Button
                 variant="ghost"

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,16 @@ import { Loader2, Mail, Lock, Github, Chrome } from "lucide-react";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const plan = searchParams.get("plan");
+  const nextParam = searchParams.get("next");
+  const planParam = searchParams.get("plan");
+  const authError = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
+  const lastErrorRef = useRef<string | null>(null);
+
+  const plan = planParam === "basic" || planParam === "pro" ? planParam : null;
+  const safeNext =
+    nextParam && nextParam.startsWith("/") ? nextParam : null;
+  const nextPath = safeNext ?? (plan ? `/pricing?plan=${plan}` : "/dashboard");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,23 +33,45 @@ function LoginForm() {
 
   const supabase = createClient();
 
+  useEffect(() => {
+    if (!authError || authError === lastErrorRef.current) return;
+
+    lastErrorRef.current = authError;
+
+    const message =
+      errorDescription ||
+      (authError === "auth_failed"
+        ? "Authentication failed. Please try again."
+        : "An error occurred");
+
+    toast.error(message);
+  }, [authError, errorDescription]);
+
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+          nextPath
+        )}`;
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: redirectTo,
           },
         });
 
         if (error) throw error;
 
-        toast.success("Check your email for the confirmation link!");
+        if (data.session) {
+          toast.success("Welcome!");
+          router.push(nextPath);
+        } else {
+          toast.success("Check your email for the confirmation link!");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -50,7 +81,7 @@ function LoginForm() {
         if (error) throw error;
 
         toast.success("Welcome back!");
-        router.push(plan ? `/pricing?plan=${plan}` : "/dashboard");
+        router.push(nextPath);
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "An error occurred";
@@ -62,10 +93,13 @@ function LoginForm() {
 
   const handleOAuthLogin = async (provider: "github" | "google") => {
     try {
+      const redirectTo = `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+        nextPath
+      )}`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
         },
       });
 

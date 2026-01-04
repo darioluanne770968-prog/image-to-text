@@ -14,7 +14,7 @@ import { Shield, Layers } from "lucide-react";
 
 export default function BatchPage() {
   const [ocrMode, setOCRMode] = useState<OCRMode>("simple");
-  const [language, setLanguage] = useState<LanguageCode>("eng");
+  const [language, setLanguage] = useState<LanguageCode>("auto");
 
   const handleProcess = useCallback(
     async (file: File, onProgress: (progress: number) => void): Promise<string> => {

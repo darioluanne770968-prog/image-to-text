@@ -1,14 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, Sparkles, Zap, Crown, Building2 } from "lucide-react";
+import { Check, Sparkles, Zap, Crown, Building2, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "sonner";
+
+type PlanKey = "basic" | "pro" | "enterprise";
 
 const plans = [
   {
     name: "Free",
+    key: "free" as const,
     icon: Sparkles,
     price: "$0",
     period: "forever",
@@ -29,9 +36,11 @@ const plans = [
     cta: "Get Started",
     href: "/",
     popular: false,
+    subscribable: false,
   },
   {
     name: "Basic",
+    key: "basic" as PlanKey,
     icon: Zap,
     price: "$9.9",
     period: "/month",
@@ -49,9 +58,11 @@ const plans = [
     cta: "Subscribe Now",
     href: "/login?plan=basic",
     popular: false,
+    subscribable: true,
   },
   {
     name: "Pro",
+    key: "pro" as PlanKey,
     icon: Crown,
     price: "$19.9",
     period: "/month",
@@ -70,9 +81,11 @@ const plans = [
     cta: "Subscribe Now",
     href: "/login?plan=pro",
     popular: true,
+    subscribable: true,
   },
   {
     name: "Enterprise",
+    key: "enterprise" as PlanKey,
     icon: Building2,
     price: "$49.9",
     period: "/month",
@@ -92,10 +105,48 @@ const plans = [
     cta: "Contact Sales",
     href: "/contact",
     popular: false,
+    subscribable: false,
   },
 ];
 
 export default function PricingPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSubscribe = async (planKey: PlanKey) => {
+    if (!user) {
+      // Not logged in, redirect to login with plan parameter
+      router.push(`/login?plan=${planKey}`);
+      return;
+    }
+
+    // User is logged in, create checkout session
+    setLoadingPlan(planKey);
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      toast.error("Failed to create checkout session");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="container py-12 md:py-20">
       <div className="max-w-6xl mx-auto">
@@ -156,14 +207,32 @@ export default function PricingPage() {
                     ))}
                   </ul>
                 )}
-                <Link href={plan.href} className="block">
+                {plan.subscribable ? (
                   <Button
                     className="w-full mt-4"
                     variant={plan.popular ? "default" : "outline"}
+                    onClick={() => handleSubscribe(plan.key as PlanKey)}
+                    disabled={loadingPlan === plan.key || authLoading}
                   >
-                    {plan.cta}
+                    {loadingPlan === plan.key ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      plan.cta
+                    )}
                   </Button>
-                </Link>
+                ) : (
+                  <Link href={plan.href} className="block">
+                    <Button
+                      className="w-full mt-4"
+                      variant={plan.popular ? "default" : "outline"}
+                    >
+                      {plan.cta}
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           ))}

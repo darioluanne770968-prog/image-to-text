@@ -7,8 +7,9 @@ import {
   recognizeText,
   type LanguageCode,
   type OCRProgress,
+  type OCRResult,
 } from "@/lib/ocr/tesseract";
-import { createExcelDocument, downloadBlob } from "@/lib/convert/to-excel";
+import { createExcelDocument, createExcelFromWords, downloadBlob } from "@/lib/convert/to-excel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -23,11 +24,12 @@ import {
 import { toast } from "sonner";
 
 export default function JpgToExcelPage() {
-  const [language, setLanguage] = useState<LanguageCode>("eng");
+  const [language, setLanguage] = useState<LanguageCode>("auto");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressStatus, setProgressStatus] = useState("");
   const [result, setResult] = useState("");
+  const [ocrData, setOcrData] = useState<OCRResult | null>(null);
   const [copied, setCopied] = useState(false);
 
   const handleImageSelect = useCallback(
@@ -36,18 +38,22 @@ export default function JpgToExcelPage() {
       setProgress(0);
       setProgressStatus("Recognizing text...");
       setResult("");
+      setOcrData(null);
 
       try {
+        // Include word data for better table extraction
         const ocrResult = await recognizeText(
           file,
           language,
           (p: OCRProgress) => {
             setProgress(Math.round(p.progress * 0.8));
             setProgressStatus(p.status);
-          }
+          },
+          true // includeWordData
         );
 
         setResult(ocrResult.text.trim());
+        setOcrData(ocrResult);
         setProgress(100);
       } catch (error) {
         console.error("Error:", error);
@@ -63,10 +69,20 @@ export default function JpgToExcelPage() {
     if (!result) return;
 
     try {
-      const blob = await createExcelDocument(result, {
-        sheetName: "Extracted Data",
-        parseTable: true,
-      });
+      let blob: Blob;
+
+      // Use word position data if available for better table extraction
+      if (ocrData?.words && ocrData.words.length > 0) {
+        blob = await createExcelFromWords(ocrData.words, {
+          sheetName: "Extracted Data",
+        });
+      } else {
+        blob = await createExcelDocument(result, {
+          sheetName: "Extracted Data",
+          parseTable: true,
+        });
+      }
+
       downloadBlob(blob, "extracted-data.xlsx");
       toast.success("Excel file downloaded!");
     } catch (error) {

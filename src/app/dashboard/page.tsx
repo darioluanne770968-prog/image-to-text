@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +50,7 @@ const planLabels = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { history, isLoading: historyLoading, deleteConversion } = useHistory();
 
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -75,10 +75,19 @@ export default function DashboardPage() {
 
       setUser(user);
 
+      // Fetch user's plan from profiles table
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan")
+        .eq("id", user.id)
+        .single();
+
+      const userPlan = (profile?.plan as UserStats["plan"]) || "free";
+
       setStats({
         dailyUsage: 0,
-        dailyLimit: planLimits.free,
-        plan: "free",
+        dailyLimit: planLimits[userPlan],
+        plan: userPlan,
         totalConversions: 0,
       });
 
@@ -86,7 +95,7 @@ export default function DashboardPage() {
     };
 
     getUser();
-  }, [router, supabase.auth]);
+  }, [router, supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

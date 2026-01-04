@@ -5,12 +5,20 @@ export interface OCRProgress {
   progress: number;
 }
 
-export interface OCRResult {
+export interface WordData {
   text: string;
+  bbox: { x0: number; y0: number; x1: number; y1: number };
   confidence: number;
 }
 
+export interface OCRResult {
+  text: string;
+  confidence: number;
+  words?: WordData[];
+}
+
 export type LanguageCode =
+  | "auto"
   | "eng"
   | "chi_sim"
   | "chi_tra"
@@ -27,7 +35,12 @@ export type LanguageCode =
   | "vie"
   | "tha";
 
+// Auto-detect uses common languages together
+// Note: Only chi_sim is included to avoid mixing simplified/traditional Chinese characters
+const AUTO_DETECT_LANGUAGES = ["eng", "chi_sim", "jpn", "kor"];
+
 export const LANGUAGES: { code: LanguageCode; name: string }[] = [
+  { code: "auto", name: "Auto Detect" },
   { code: "eng", name: "English" },
   { code: "chi_sim", name: "Chinese (Simplified)" },
   { code: "chi_tra", name: "Chinese (Traditional)" },
@@ -43,14 +56,23 @@ export const LANGUAGES: { code: LanguageCode; name: string }[] = [
   { code: "ita", name: "Italian" },
   { code: "vie", name: "Vietnamese" },
   { code: "tha", name: "Thai" },
+
 ];
+
+export function getLanguageString(language: LanguageCode | LanguageCode[]): string {
+  if (language === "auto") {
+    return AUTO_DETECT_LANGUAGES.join("+");
+  }
+  return Array.isArray(language) ? language.join("+") : language;
+}
 
 export async function recognizeText(
   image: File | string,
-  language: LanguageCode | LanguageCode[] = "eng",
-  onProgress?: (progress: OCRProgress) => void
+  language: LanguageCode | LanguageCode[] = "auto",
+  onProgress?: (progress: OCRProgress) => void,
+  includeWordData: boolean = false
 ): Promise<OCRResult> {
-  const langString = Array.isArray(language) ? language.join("+") : language;
+  const langString = getLanguageString(language);
 
   const result = await Tesseract.recognize(image, langString, {
     logger: (m) => {
@@ -63,10 +85,21 @@ export async function recognizeText(
     },
   });
 
-  return {
+  const ocrResult: OCRResult = {
     text: result.data.text,
     confidence: result.data.confidence,
   };
+
+  // Extract word data with positions for table detection
+  if (includeWordData && result.data.words) {
+    ocrResult.words = result.data.words.map((word) => ({
+      text: word.text,
+      bbox: word.bbox,
+      confidence: word.confidence,
+    }));
+  }
+
+  return ocrResult;
 }
 
 export function formatOCRResult(result: OCRResult, formatted: boolean): string {

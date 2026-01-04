@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 
 export default function PdfToExcelPage() {
-  const [language, setLanguage] = useState<LanguageCode>("eng");
+  const [language, setLanguage] = useState<LanguageCode>("auto");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressStatus, setProgressStatus] = useState("");

@@ -25,7 +25,7 @@ import {
 import { toast } from "sonner";
 
 export default function JpgToWordPage() {
-  const [language, setLanguage] = useState<LanguageCode>("eng");
+  const [language, setLanguage] = useState<LanguageCode>("auto");
   const [ocrMode, setOCRMode] = useState<OCRMode>("simple");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);

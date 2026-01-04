@@ -35,7 +35,7 @@ import {
 import { toast } from "sonner";
 
 export default function ImageTranslatorPage() {
-  const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("eng");
+  const [sourceLanguage, setSourceLanguage] = useState<LanguageCode>("auto");
   const [targetLanguage, setTargetLanguage] = useState<TranslateLanguage>("zh");
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);

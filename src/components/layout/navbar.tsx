@@ -9,14 +9,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ImageIcon, Menu, Sparkles, User } from "lucide-react";
+import { ImageIcon, Menu, Sparkles, User, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useI18n } from "@/lib/i18n/context";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Navbar() {
   const pathname = usePathname();
   const { t } = useI18n();
+  const { user, isLoading } = useAuth();
 
   const navItems = [
     { href: "/", label: t.nav.imageToText },
@@ -25,6 +27,14 @@ export function Navbar() {
     { href: "/jpg-to-word", label: t.nav.jpgToWord },
     { href: "/jpg-to-excel", label: t.nav.jpgToExcel },
     { href: "/pdf-to-excel", label: t.nav.pdfToExcel },
+    { href: "/pdf-to-word", label: t.nav.pdfToWord },
+    { href: "/pdf-to-text", label: t.nav.pdfToText },
+    { href: "/text-to-pdf", label: t.nav.textToPdf },
+    { href: "/image-to-pdf", label: t.nav.imageToPdf },
+    { href: "/pdf-to-jpg", label: t.nav.pdfToJpg },
+    { href: "/text-to-image", label: t.nav.textToImage },
+    { href: "/qr-scanner", label: t.nav.qrScanner },
+    { href: "/history", label: t.nav.history },
   ];
 
   return (
@@ -66,12 +76,23 @@ export function Navbar() {
               {t.nav.pricing}
             </Button>
           </Link>
-          <Link href="/login">
-            <Button variant="outline" size="sm" className="gap-2">
-              <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{t.nav.login}</span>
-            </Button>
-          </Link>
+          {!isLoading && (
+            user ? (
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t.nav.login}</span>
+                </Button>
+              </Link>
+            )
+          )}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="md:hidden">

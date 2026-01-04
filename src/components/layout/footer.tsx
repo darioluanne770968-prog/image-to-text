@@ -6,11 +6,16 @@ export function Footer() {
       <div className="container py-6 sm:py-8 md:py-12">
         <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-4">
           <div>
-            <h3 className="font-semibold mb-3">Tools</h3>
+            <h3 className="font-semibold mb-3">OCR Tools</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <Link href="/" className="hover:text-foreground transition-colors">
                   Image to Text
+                </Link>
+              </li>
+              <li>
+                <Link href="/batch" className="hover:text-foreground transition-colors">
+                  Batch Upload
                 </Link>
               </li>
               <li>
@@ -29,8 +34,48 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/qr-scanner" className="hover:text-foreground transition-colors">
+                  QR Scanner
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-3">PDF Tools</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>
+                <Link href="/pdf-to-text" className="hover:text-foreground transition-colors">
+                  PDF to Text
+                </Link>
+              </li>
+              <li>
+                <Link href="/pdf-to-word" className="hover:text-foreground transition-colors">
+                  PDF to Word
+                </Link>
+              </li>
+              <li>
                 <Link href="/pdf-to-excel" className="hover:text-foreground transition-colors">
                   PDF to Excel
+                </Link>
+              </li>
+              <li>
+                <Link href="/pdf-to-jpg" className="hover:text-foreground transition-colors">
+                  PDF to JPG
+                </Link>
+              </li>
+              <li>
+                <Link href="/text-to-pdf" className="hover:text-foreground transition-colors">
+                  Text to PDF
+                </Link>
+              </li>
+              <li>
+                <Link href="/image-to-pdf" className="hover:text-foreground transition-colors">
+                  Image to PDF
+                </Link>
+              </li>
+              <li>
+                <Link href="/text-to-image" className="hover:text-foreground transition-colors">
+                  Text to Image
                 </Link>
               </li>
             </ul>
@@ -73,15 +118,16 @@ export function Footer() {
                   Terms of Service
                 </Link>
               </li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-3">Languages</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>English</li>
-              <li>Chinese</li>
-              <li>Spanish</li>
-              <li>Japanese</li>
+              <li>
+                <Link href="/history" className="hover:text-foreground transition-colors">
+                  History
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-foreground transition-colors">
+                  Login / Sign Up
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

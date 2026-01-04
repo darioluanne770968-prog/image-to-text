@@ -4,7 +4,9 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  const nextParam = searchParams.get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") ? nextParam : null;
+  const next = safeNext ?? "/dashboard";
 
   if (code) {
     const supabase = await createClient();
@@ -14,5 +16,10 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth_failed`);
+  const loginUrl = new URL(`${origin}/login`);
+  loginUrl.searchParams.set("error", "auth_failed");
+  if (safeNext) {
+    loginUrl.searchParams.set("next", safeNext);
+  }
+  return NextResponse.redirect(loginUrl.toString());
 }

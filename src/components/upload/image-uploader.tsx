@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Upload, Link as LinkIcon, ImageIcon, X, Loader2 } from "lucide-react";
+import { Upload, Link as LinkIcon, ImageIcon, X, Loader2, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ImageUploaderProps {
@@ -38,6 +38,7 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [urlDialogOpen, setUrlDialogOpen] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlError, setUrlError] = useState("");
@@ -141,19 +142,31 @@ export function ImageUploader({
         <input {...getInputProps()} ref={inputRef} />
 
         {preview ? (
-          <div className="relative inline-block">
+          <div className="relative inline-block group">
             <img
               src={preview}
               alt="Preview"
-              className="max-h-48 max-w-full rounded-lg mx-auto"
+              className="max-h-48 max-w-full rounded-lg mx-auto cursor-pointer transition-opacity group-hover:opacity-90"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreviewDialogOpen(true);
+              }}
             />
+            {/* Zoom hint overlay */}
+            <div
+              className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+            >
+              <div className="bg-black/60 rounded-full p-2">
+                <ZoomIn className="h-6 w-6 text-white" />
+              </div>
+            </div>
             {!isProcessing && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   clearPreview();
                 }}
-                className="absolute -top-2 -right-2 p-1 bg-destructive rounded-full text-destructive-foreground hover:bg-destructive/90"
+                className="absolute -top-2 -right-2 p-1 bg-destructive rounded-full text-destructive-foreground hover:bg-destructive/90 z-10"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -254,6 +267,24 @@ export function ImageUploader({
           </div>
         )}
       </div>
+
+      {/* Image Preview Dialog */}
+      <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] p-2 sm:p-4">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Image Preview</DialogTitle>
+          </DialogHeader>
+          {preview && (
+            <div className="flex items-center justify-center overflow-auto">
+              <img
+                src={preview}
+                alt="Full Preview"
+                className="max-w-full max-h-[80vh] object-contain rounded-lg"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
