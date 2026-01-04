@@ -23,9 +23,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import * as pdfjsLib from "pdfjs-dist";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface ConvertedImage {
   page: number;
@@ -63,6 +60,9 @@ export default function PDFToJPGPage() {
     setImages([]);
 
     try {
+      const pdfjsLib = await import("pdfjs-dist");
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const totalPages = pdf.numPages;
@@ -82,6 +82,7 @@ export default function PDFToJPGPage() {
         await page.render({
           canvasContext: context,
           viewport: viewport,
+          canvas: canvas,
         }).promise;
 
         const dataUrl = canvas.toDataURL("image/jpeg", qualityValue);

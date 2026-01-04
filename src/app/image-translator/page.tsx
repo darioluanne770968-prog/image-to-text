@@ -45,7 +45,8 @@ export default function ImageTranslatorPage() {
   const [copied, setCopied] = useState(false);
 
   const ocrToTranslateLang = (ocr: LanguageCode): TranslateLanguage => {
-    const mapping: Record<LanguageCode, TranslateLanguage> = {
+    const mapping: Partial<Record<LanguageCode, TranslateLanguage>> = {
+      auto: "en",
       eng: "en",
       chi_sim: "zh",
       chi_tra: "zh",

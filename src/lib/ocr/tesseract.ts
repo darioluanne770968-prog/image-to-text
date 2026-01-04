@@ -91,8 +91,9 @@ export async function recognizeText(
   };
 
   // Extract word data with positions for table detection
-  if (includeWordData && result.data.words) {
-    ocrResult.words = result.data.words.map((word) => ({
+  const dataWithWords = result.data as { words?: Array<{ text: string; bbox: { x0: number; y0: number; x1: number; y1: number }; confidence: number }> };
+  if (includeWordData && dataWithWords.words) {
+    ocrResult.words = dataWithWords.words.map((word) => ({
       text: word.text,
       bbox: word.bbox,
       confidence: word.confidence,

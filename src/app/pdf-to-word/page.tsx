@@ -64,7 +64,7 @@ export default function PdfToWordPage() {
     if (!result) return;
 
     try {
-      const blob = await createWordDocument(result, {
+      const blob = await createWordDocument(result, undefined, {
         title: "Extracted from PDF",
         formatted: true,
       });
