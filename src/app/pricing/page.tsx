@@ -124,7 +124,7 @@ export default function PricingPage() {
     // User is logged in, create checkout session
     setLoadingPlan(planKey);
     try {
-      const response = await fetch("/api/stripe/checkout", {
+      const response = await fetch("/api/lemonsqueezy/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey }),
@@ -247,7 +247,7 @@ export default function PricingPage() {
             />
             <FaqItem
               question="What payment methods do you accept?"
-              answer="We accept all major credit cards (Visa, MasterCard, American Express) through our secure Stripe payment processor."
+              answer="We accept all major credit cards (Visa, MasterCard, American Express) through our secure payment processor."
             />
             <FaqItem
               question="Is my data secure?"
