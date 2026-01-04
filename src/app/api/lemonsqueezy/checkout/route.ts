@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const checkoutId = LEMONSQUEEZY_PLANS[plan].checkoutId;
 
     // Create checkout URL with custom data
-    const checkoutUrl = new URL("https://imagetotext.lemonsqueezy.com/checkout/buy/" + checkoutId);
+    const checkoutUrl = new URL("https://imagetotext.lemonsqueezy.com/buy/" + checkoutId);
 
     // Add custom data to pass user ID to webhook
     checkoutUrl.searchParams.set("checkout[custom][user_id]", user.id);
