@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { initializePaddle, type Paddle } from "@paddle/paddle-js";
+import { PADDLE_CLIENT_TOKEN, PADDLE_ENVIRONMENT } from "@/lib/paddle/config";
 
 type PlanKey = "basic" | "pro" | "enterprise";
 
@@ -102,10 +104,10 @@ const plans = [
       "Custom integrations",
     ],
     limitations: [],
-    cta: "Contact Sales",
-    href: "/contact",
+    cta: "Subscribe Now",
+    href: "/login?plan=enterprise",
     popular: false,
-    subscribable: false,
+    subscribable: true,
   },
 ];
 
@@ -113,6 +115,18 @@ export default function PricingPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [paddle, setPaddle] = useState<Paddle | null>(null);
+
+  useEffect(() => {
+    initializePaddle({
+      environment: PADDLE_ENVIRONMENT as "sandbox" | "production",
+      token: PADDLE_CLIENT_TOKEN,
+    }).then((paddleInstance) => {
+      if (paddleInstance) {
+        setPaddle(paddleInstance);
+      }
+    });
+  }, []);
 
   const handleSubscribe = async (planKey: PlanKey) => {
     if (!user) {
@@ -121,10 +135,15 @@ export default function PricingPage() {
       return;
     }
 
-    // User is logged in, create checkout session
+    if (!paddle) {
+      toast.error("Payment system is loading, please try again");
+      return;
+    }
+
+    // User is logged in, get checkout info from API
     setLoadingPlan(planKey);
     try {
-      const response = await fetch("/api/lemonsqueezy/checkout", {
+      const response = await fetch("/api/paddle/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: planKey }),
@@ -137,9 +156,17 @@ export default function PricingPage() {
         return;
       }
 
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      // Open Paddle checkout
+      paddle.Checkout.open({
+        items: [{ priceId: data.priceId, quantity: 1 }],
+        customData: data.customData,
+        customer: {
+          email: data.customerEmail,
+        },
+        settings: {
+          successUrl: `${window.location.origin}/dashboard?success=true`,
+        },
+      });
     } catch (error) {
       toast.error("Failed to create checkout session");
     } finally {
@@ -247,7 +274,7 @@ export default function PricingPage() {
             />
             <FaqItem
               question="What payment methods do you accept?"
-              answer="We accept all major credit cards (Visa, MasterCard, American Express) through our secure payment processor."
+              answer="We accept all major credit cards (Visa, MasterCard, American Express) and PayPal through our secure payment processor Paddle."
             />
             <FaqItem
               question="Is my data secure?"
