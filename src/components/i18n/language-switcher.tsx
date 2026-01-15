@@ -14,6 +14,11 @@ import type { Locale } from "@/lib/i18n/translations";
 const languages: { code: Locale; name: string; flag: string }[] = [
   { code: "en", name: "English", flag: "🇺🇸" },
   { code: "zh", name: "中文", flag: "🇨🇳" },
+  { code: "es", name: "Español", flag: "🇪🇸" },
+  { code: "pt", name: "Português", flag: "🇧🇷" },
+  { code: "id", name: "Bahasa Indonesia", flag: "🇮🇩" },
+  { code: "fr", name: "Français", flag: "🇫🇷" },
+  { code: "de", name: "Deutsch", flag: "🇩🇪" },
 ];
 
 export function LanguageSwitcher() {

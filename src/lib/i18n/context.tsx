@@ -10,7 +10,10 @@ import {
 } from "react";
 import { translations, type Locale } from "./translations";
 
-type Translations = typeof translations.en | typeof translations.zh;
+// All supported locales
+const SUPPORTED_LOCALES: Locale[] = ["en", "zh", "es", "pt", "id", "fr", "de"];
+
+type Translations = (typeof translations)[Locale];
 
 interface I18nContextType {
   locale: Locale;
@@ -20,19 +23,33 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
+// Map browser language codes to our supported locales
+function detectLocaleFromBrowser(browserLang: string): Locale | null {
+  // Direct matches and common variants
+  if (browserLang.startsWith("zh")) return "zh";
+  if (browserLang.startsWith("es")) return "es";
+  if (browserLang.startsWith("pt")) return "pt";
+  if (browserLang.startsWith("id")) return "id";
+  if (browserLang.startsWith("fr")) return "fr";
+  if (browserLang.startsWith("de")) return "de";
+  if (browserLang.startsWith("en")) return "en";
+  return null;
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
     // Load saved locale from localStorage
     const savedLocale = localStorage.getItem("locale") as Locale | null;
-    if (savedLocale && (savedLocale === "en" || savedLocale === "zh")) {
+    if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
       setLocaleState(savedLocale);
     } else {
-      // Detect browser language
+      // Detect browser language and map to supported locale
       const browserLang = navigator.language.toLowerCase();
-      if (browserLang.startsWith("zh")) {
-        setLocaleState("zh");
+      const detectedLocale = detectLocaleFromBrowser(browserLang);
+      if (detectedLocale) {
+        setLocaleState(detectedLocale);
       }
     }
   }, []);
