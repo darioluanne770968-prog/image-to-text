@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, X, Send, Bot, User, Mail, UserIcon, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Mail, UserIcon, Loader2, Maximize2, Minimize2, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -28,6 +28,7 @@ const QUICK_REPLIES = [
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [leadInfo, setLeadInfo] = useState<LeadInfo | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,6 +36,12 @@ export function ChatWidget() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,6 +133,37 @@ export function ChatWidget() {
     handleSend(reply);
   };
 
+  const handlePopout = () => {
+    // Store current state in sessionStorage for the popup to use
+    const chatState = {
+      leadInfo,
+      messages,
+      name,
+      email,
+    };
+    sessionStorage.setItem("chatPopupState", JSON.stringify(chatState));
+
+    // Open popup window
+    const width = 420;
+    const height = 600;
+    const left = window.screen.width - width - 20;
+    const top = 100;
+
+    window.open(
+      "/chat-popup",
+      "ChatPopup",
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no`
+    );
+
+    // Close the embedded widget
+    setIsOpen(false);
+  };
+
+  // Window size classes based on expanded state
+  const windowClasses = isExpanded
+    ? "fixed bottom-0 right-0 sm:bottom-6 sm:right-6 w-full sm:w-[480px] h-full sm:h-[700px] sm:rounded-lg"
+    : "fixed bottom-6 right-6 w-80 sm:w-96 h-[500px]";
+
   return (
     <>
       {/* Chat Button */}
@@ -142,7 +180,7 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-6 right-6 w-80 sm:w-96 h-[500px] shadow-2xl z-50 flex flex-col">
+        <Card className={cn(windowClasses, "shadow-2xl z-50 flex flex-col")}>
           <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <CardTitle className="text-base flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
@@ -153,14 +191,41 @@ export function ChatWidget() {
                 <span className="text-xs opacity-80">We typically reply within hours</span>
               </div>
             </CardTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 hover:bg-white/20 text-primary-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {/* Popout Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-white/20 text-primary-foreground"
+                onClick={handlePopout}
+                title="Open in new window"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </Button>
+              {/* Expand/Minimize Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-white/20 text-primary-foreground"
+                onClick={() => setIsExpanded(!isExpanded)}
+                title={isExpanded ? "Minimize" : "Expand"}
+              >
+                {isExpanded ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+              </Button>
+              {/* Close Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-white/20 text-primary-foreground"
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
 
           {!leadInfo ? (
@@ -284,6 +349,7 @@ export function ChatWidget() {
                     </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </CardContent>
 
               <div className="p-4 border-t">
