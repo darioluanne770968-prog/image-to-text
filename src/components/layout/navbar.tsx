@@ -9,7 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ImageIcon, Menu, Sparkles, User, LayoutDashboard } from "lucide-react";
+import { ImageIcon, Menu, Sparkles, User, LayoutDashboard, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/i18n/language-switcher";
 import { useI18n } from "@/lib/i18n/context";
@@ -70,6 +70,12 @@ export function Navbar() {
 
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
+          <Link href="/blog">
+            <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+              <BookOpen className="h-4 w-4" />
+              {t.nav.blog}
+            </Button>
+          </Link>
           <Link href="/pricing">
             <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
               <Sparkles className="h-4 w-4" />
@@ -106,6 +112,9 @@ export function Navbar() {
                   <Link href={item.href}>{item.label}</Link>
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuItem asChild>
+                <Link href="/blog">{t.nav.blog}</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/pricing">{t.nav.pricing}</Link>
               </DropdownMenuItem>

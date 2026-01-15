@@ -29,6 +29,7 @@ export const translations = {
       history: "History",
       pricing: "Pricing",
       login: "Login",
+      blog: "Blog",
     },
     home: {
       title: "Image to Text Converter",
@@ -188,6 +189,7 @@ export const translations = {
       history: "历史记录",
       pricing: "价格",
       login: "登录",
+      blog: "博客",
     },
     home: {
       title: "图片转文字转换器",
@@ -347,6 +349,7 @@ export const translations = {
       history: "Historial",
       pricing: "Precios",
       login: "Iniciar Sesión",
+      blog: "Blog",
     },
     home: {
       title: "Convertidor de Imagen a Texto",
@@ -506,6 +509,7 @@ export const translations = {
       history: "Histórico",
       pricing: "Preços",
       login: "Entrar",
+      blog: "Blog",
     },
     home: {
       title: "Conversor de Imagem para Texto",
@@ -665,6 +669,7 @@ export const translations = {
       history: "Riwayat",
       pricing: "Harga",
       login: "Masuk",
+      blog: "Blog",
     },
     home: {
       title: "Konverter Gambar ke Teks",
@@ -824,6 +829,7 @@ export const translations = {
       history: "Historique",
       pricing: "Tarifs",
       login: "Connexion",
+      blog: "Blog",
     },
     home: {
       title: "Convertisseur Image en Texte",
@@ -983,6 +989,7 @@ export const translations = {
       history: "Verlauf",
       pricing: "Preise",
       login: "Anmelden",
+      blog: "Blog",
     },
     home: {
       title: "Bild zu Text Konverter",
