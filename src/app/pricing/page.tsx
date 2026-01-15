@@ -239,7 +239,7 @@ export default function PricingPage() {
                     className="w-full mt-4"
                     variant={plan.popular ? "default" : "outline"}
                     onClick={() => handleSubscribe(plan.key as PlanKey)}
-                    disabled={loadingPlan === plan.key || authLoading}
+                    disabled={loadingPlan === plan.key}
                   >
                     {loadingPlan === plan.key ? (
                       <>
