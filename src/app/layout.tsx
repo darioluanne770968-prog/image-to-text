@@ -12,24 +12,65 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const BASE_URL = "https://imagetotext-orcin-seven.vercel.app";
+
 export const metadata: Metadata = {
-  title: "Image to Text Converter - Free Online OCR Tool",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "Image to Text Converter - Free Online OCR Tool",
+    template: "%s | Image To Text",
+  },
   description:
-    "An online image to text converter to extract text from images. Supports JPG, PNG, GIF, PDF and more. Free OCR tool with multi-language support.",
+    "Free online OCR tool to extract text from images. Convert JPG, PNG, PDF to editable text instantly. Supports 25+ languages with high accuracy.",
   keywords: [
     "image to text",
     "OCR",
     "text extractor",
     "JPG to text",
     "PNG to text",
+    "PDF to text",
     "image converter",
     "free OCR",
+    "online OCR",
+    "extract text from image",
+    "picture to text",
+    "photo to text",
   ],
+  authors: [{ name: "Image To Text" }],
+  creator: "Image To Text",
+  publisher: "Image To Text",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
     title: "Image to Text Converter - Free Online OCR Tool",
     description:
-      "Extract text from images instantly. Supports multiple formats and languages.",
+      "Extract text from images instantly. Free OCR tool supporting JPG, PNG, PDF and 25+ languages.",
+    url: BASE_URL,
+    siteName: "Image To Text",
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Image to Text Converter - Free Online OCR Tool",
+    description:
+      "Extract text from images instantly. Free OCR tool supporting JPG, PNG, PDF and 25+ languages.",
+  },
+  alternates: {
+    canonical: BASE_URL,
+  },
+  verification: {
+    // Add your Google Search Console verification code here
+    // google: "your-google-verification-code",
   },
 };
 
