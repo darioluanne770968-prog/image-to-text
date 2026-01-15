@@ -13,9 +13,9 @@ const supabaseAdmin = createClient(
 
 // Price ID to plan mapping
 const PRICE_TO_PLAN: Record<string, string> = {
-  "pri_01ke8pb3w3b99240j0k7b1999y": "basic",
+  "pri_01ke8pdzc3dskrz3mfcfxqdbp7": "basic",
   "pri_01ke8pd5j0z1v1477tw8xvcxtz": "pro",
-  "pri_01ke8pdzc3dskrz3mfcfxqdbp7": "enterprise",
+  "pri_01ke8pb3w3b99240j0k7b1999y": "enterprise",
 };
 
 function verifySignature(payload: string, signature: string, timestamp: string): boolean {
