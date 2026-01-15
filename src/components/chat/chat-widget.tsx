@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, X, Send, Bot, User } from "lucide-react";
+import { MessageCircle, X, Send, Bot, User, Mail, UserIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -13,72 +14,116 @@ interface Message {
   content: string;
 }
 
-const FAQ_RESPONSES: Record<string, string> = {
-  "how to use": "Simply upload an image by dragging and dropping, or click the Browse button. Select your language and click Convert to extract text.",
-  "supported formats": "We support JPG, PNG, GIF, JFIF, HEIC, WebP, and PDF formats.",
-  "languages": "We support 15+ languages including English, Chinese (Simplified & Traditional), Japanese, Korean, Spanish, French, German, and more.",
-  "pricing": "We offer Free, Basic ($9.9/mo), Pro ($19.9/mo), and Enterprise ($49.9/mo) plans. Visit our Pricing page for details.",
-  "history": "Your conversion history is saved when you're logged in. Visit the History page to view past conversions.",
-  "batch": "Yes! You can upload multiple images at once. We process up to 3 images in parallel for faster results.",
-  "accuracy": "OCR accuracy depends on image quality. For best results, use clear, high-resolution images with good contrast.",
-  "privacy": "Your privacy is protected. Free tier processing happens entirely in your browser. No data is uploaded to our servers.",
-  "api": "API access is available for Pro and Enterprise plans. Check our documentation for integration details.",
-  "contact": "You can reach us through the Contact page or email support@imagetotext.info",
-};
-
-function findResponse(input: string): string {
-  const lowerInput = input.toLowerCase();
-
-  for (const [key, response] of Object.entries(FAQ_RESPONSES)) {
-    if (lowerInput.includes(key)) {
-      return response;
-    }
-  }
-
-  if (lowerInput.includes("hello") || lowerInput.includes("hi") || lowerInput.includes("hey")) {
-    return "Hello! How can I help you today? You can ask about: how to use, supported formats, languages, pricing, batch processing, or privacy.";
-  }
-
-  if (lowerInput.includes("thank")) {
-    return "You're welcome! Is there anything else I can help you with?";
-  }
-
-  return "I'm not sure I understand. You can ask about:\n• How to use the tool\n• Supported formats\n• Available languages\n• Pricing plans\n• Batch processing\n• Privacy & security\n\nOr contact our support team for more help.";
+interface LeadInfo {
+  name: string;
+  email: string;
 }
+
+const QUICK_REPLIES = [
+  "How do I use this tool?",
+  "What formats are supported?",
+  "Tell me about pricing",
+  "I need help with an issue",
+];
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: "Hi! I'm your virtual assistant. How can I help you today?",
-    },
-  ]);
+  const [leadInfo, setLeadInfo] = useState<LeadInfo | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isSubmittingLead, setIsSubmittingLead] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) return;
+
+    setIsSubmittingLead(true);
+
+    try {
+      // Save lead info to API
+      await fetch("/api/chat/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), email: email.trim() }),
+      });
+
+      setLeadInfo({ name: name.trim(), email: email.trim() });
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: `Hi ${name.trim()}! 👋 Thanks for reaching out. How can I help you today?\n\nYou can ask me anything or choose from the quick options below.`,
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to save lead:", error);
+      // Still allow chat even if lead save fails
+      setLeadInfo({ name: name.trim(), email: email.trim() });
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: `Hi ${name.trim()}! How can I help you today?`,
+        },
+      ]);
+    } finally {
+      setIsSubmittingLead(false);
+    }
+  };
+
+  const handleSend = async (messageText?: string) => {
+    const text = messageText || input;
+    if (!text.trim() || !leadInfo) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: text.trim(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsSending(true);
 
-    // Simulate typing delay
-    setTimeout(() => {
-      const response = findResponse(input);
+    try {
+      // Send message to API for notification
+      const response = await fetch("/api/chat/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: leadInfo.name,
+          email: leadInfo.email,
+          message: text.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      // Show auto-reply
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response,
+        content: data.autoReply || "Thanks for your message! Our team will get back to you via email shortly.",
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    }, 500);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Thanks for your message! Our team will review it and get back to you via email.",
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleQuickReply = (reply: string) => {
+    handleSend(reply);
   };
 
   return (
@@ -98,73 +143,171 @@ export function ChatWidget() {
       {/* Chat Window */}
       {isOpen && (
         <Card className="fixed bottom-6 right-6 w-80 sm:w-96 h-[500px] shadow-2xl z-50 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b">
+          <CardHeader className="flex flex-row items-center justify-between py-3 px-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <CardTitle className="text-base flex items-center gap-2">
-              <Bot className="h-5 w-5 text-primary" />
-              Chat Support
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-semibold">Support Team</span>
+                <span className="text-xs opacity-80">We typically reply within hours</span>
+              </div>
             </CardTitle>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 hover:bg-white/20 text-primary-foreground"
               onClick={() => setIsOpen(false)}
             >
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
 
-          <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn(
-                  "flex gap-2",
-                  message.role === "user" ? "justify-end" : "justify-start"
-                )}
-              >
-                {message.role === "assistant" && (
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <Bot className="h-4 w-4 text-primary" />
-                  </div>
-                )}
-                <div
-                  className={cn(
-                    "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
-                  )}
-                >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+          {!leadInfo ? (
+            // Lead Capture Form
+            <CardContent className="flex-1 flex flex-col justify-center p-6">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="h-8 w-8 text-primary" />
                 </div>
-                {message.role === "user" && (
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
-                    <User className="h-4 w-4 text-primary-foreground" />
+                <h3 className="font-semibold text-lg mb-2">Let&apos;s chat!</h3>
+                <p className="text-sm text-muted-foreground">
+                  Fill in your details to get started. We&apos;ll respond via email.
+                </p>
+              </div>
+
+              <form onSubmit={handleLeadSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="chat-name" className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" />
+                    Name
+                  </Label>
+                  <Input
+                    id="chat-name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="chat-email" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </Label>
+                  <Input
+                    id="chat-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isSubmittingLead || !name.trim() || !email.trim()}
+                >
+                  {isSubmittingLead ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Starting...
+                    </>
+                  ) : (
+                    "Start the chat"
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          ) : (
+            // Chat Interface
+            <>
+              <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      "flex gap-2",
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    )}
+                  >
+                    {message.role === "assistant" && (
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Bot className="h-4 w-4 text-primary" />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        "max-w-[80%] rounded-lg px-3 py-2 text-sm",
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      )}
+                    >
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    </div>
+                    {message.role === "user" && (
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                        <User className="h-4 w-4 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Quick Replies - Show after first message */}
+                {messages.length === 1 && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {QUICK_REPLIES.map((reply) => (
+                      <Button
+                        key={reply}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => handleQuickReply(reply)}
+                      >
+                        {reply}
+                      </Button>
+                    ))}
                   </div>
                 )}
-              </div>
-            ))}
-          </CardContent>
 
-          <div className="p-4 border-t">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSend();
-              }}
-              className="flex gap-2"
-            >
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1"
-              />
-              <Button type="submit" size="icon">
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
+                {isSending && (
+                  <div className="flex gap-2 justify-start">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                      <Bot className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="bg-muted rounded-lg px-3 py-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+
+              <div className="p-4 border-t">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSend();
+                  }}
+                  className="flex gap-2"
+                >
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Type your message..."
+                    className="flex-1"
+                    disabled={isSending}
+                  />
+                  <Button type="submit" size="icon" disabled={isSending || !input.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            </>
+          )}
         </Card>
       )}
     </>
