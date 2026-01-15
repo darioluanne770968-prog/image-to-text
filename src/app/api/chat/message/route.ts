@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 // Smart auto-replies based on message content
 function getAutoReply(message: string): string {
@@ -9,7 +9,9 @@ function getAutoReply(message: string): string {
   if (
     lowerMessage.includes("hello") ||
     lowerMessage.includes("hi") ||
-    lowerMessage.includes("hey")
+    lowerMessage.includes("hey") ||
+    lowerMessage.includes("你好") ||
+    lowerMessage.includes("您好")
   ) {
     return "Hello! Thanks for reaching out. Our team will review your message and get back to you via email within 24 hours. Is there anything specific I can help you with in the meantime?";
   }
@@ -82,32 +84,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Save message to Supabase
-    const { error: dbError } = await supabase.from("chat_messages").insert({
+    const { data, error: dbError } = await supabase.from("chat_messages").insert({
       name,
       email,
       message,
       created_at: new Date().toISOString(),
-    });
+    }).select();
 
     if (dbError) {
       console.error("Failed to save message:", dbError);
+    } else {
+      console.log("Message saved successfully:", data);
     }
 
     // Send email notification (if Resend is configured)
     if (process.env.RESEND_API_KEY) {
+      const notificationEmail = process.env.NOTIFICATION_EMAIL || "your-email@example.com";
+      console.log("Sending email notification to:", notificationEmail);
+
       try {
-        await fetch("https://api.resend.com/emails", {
+        const emailResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            from: "ImageToText <noreply@imagetotext-orcin-seven.vercel.app>",
-            to: process.env.NOTIFICATION_EMAIL || "your-email@example.com",
+            from: "ImageToText <onboarding@resend.dev>",
+            to: notificationEmail,
             subject: `New Chat Message from ${name}`,
             html: `
               <h2>New Chat Message</h2>
@@ -120,9 +127,18 @@ export async function POST(request: NextRequest) {
             `,
           }),
         });
+
+        const emailResult = await emailResponse.json();
+        console.log("Email API response:", emailResult);
+
+        if (!emailResponse.ok) {
+          console.error("Email API error:", emailResult);
+        }
       } catch (emailError) {
         console.error("Failed to send email notification:", emailError);
       }
+    } else {
+      console.log("RESEND_API_KEY not configured, skipping email notification");
     }
 
     // Get smart auto-reply

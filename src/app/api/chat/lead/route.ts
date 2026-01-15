@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,23 +12,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Save lead to Supabase
-    const { error } = await supabase.from("chat_leads").insert({
+    const { data, error } = await supabase.from("chat_leads").insert({
       name,
       email,
       created_at: new Date().toISOString(),
-    });
+    }).select();
 
     if (error) {
       console.error("Failed to save lead:", error);
-      // Don't fail the request even if DB save fails
+      return NextResponse.json(
+        { error: "Failed to save lead", details: error.message },
+        { status: 500 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    console.log("Lead saved successfully:", data);
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Lead API error:", error);
-    return NextResponse.json({ success: true }); // Don't block chat even on error
+    return NextResponse.json(
+      { error: "Internal server error", details: String(error) },
+      { status: 500 }
+    );
   }
 }
